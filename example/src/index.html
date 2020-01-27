@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        test-qs {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        test-q table {
+            border-collapse: collapse;
+        }
+
+        table td,
+        table th {
+            padding: 5px;
+            border: solid 1px;
+        }
+    </style>
+</head>
+
+<body>
+    <test-qs>
+        <test-q>
+            <h1>Question 1</h1>
+            <test-options>
+                <label>
+                    <input type='radio' name='q1' value="Option A" />
+                    <span>Option A</span>
+                </label>
+                <label>
+                    <input type='radio' name='q1' value="Option B" />
+                    <span>Option B</span>
+                </label>
+            </test-options>
+        </test-q>
+        <test-q>
+            <h1>Question 2</h1>
+            <test-options>
+                <label>
+                    <input type='radio' name='q2' value="Option 1" />
+                    <span>Option 1</span>
+                </label>
+                <label>
+                    <input type='radio' name='q2' value='Option 2' />
+                    <span>Option 2</span>
+                </label>
+            </test-options>
+        </test-q>
+        <test-q>
+            <h1>Question 3</h1>
+            <test-options>
+                <label>
+                    <input type='radio' name='q3' value='Option X' />
+                    <span>Option X</span>
+                </label>
+                <label>
+                    <input type='radio' name='q3' value='Option Y' />
+                    <span>Option Y</span>
+                </label>
+            </test-options>
+        </test-q>
+        <test-q class='text'>
+            <h1>Question 4</h1>
+            <form>
+                <textarea></textarea>
+            </form>
+        </test-q>
+        <test-q class='text'>
+            <h1>Question 5</h1>
+            <form>
+                <textarea></textarea>
+            </form>
+        </test-q>
+        <test-q class='no-q thank-you'>
+            <h1>Thank You</h1>
+            <button type='button' id="submit">Submit</button>
+        </test-q>
+        <test-q class='result no-q'>
+            <h1>Result</h1>
+            <table>
+                <thead>
+                    <th>Question</th>
+                    <th>Answer</th>
+                </thead>
+                <tbody id='res_body'>
+
+                </tbody>
+            </table>
+        </test-q>
+    </test-qs>
+
+    <script>
+        const testQs = document.querySelector('test-qs');
+        const resBody = document.querySelector('#res_body');
+
+        testQs.addEventListener('swipe', (e) => {
+            const index = e.detail;
+            const qs = testQs.qs;
+            const q = qs[index];
+            let value;
+            if (q.classList.contains('no-q')) {
+                return;
+            }
+
+            if (q.classList.contains('text')) {
+                const textarea = q.querySelector('textarea');
+                if (!textarea || !textarea.value) {
+                    return;
+                }
+                value = textarea.value;
+            } else {
+                const options = testQs.querySelector('test-options');
+                if (!options) {
+                    return;
+                }
+                const res = options.validate();
+                if (!res.success) return;
+                value = res.value;
+            }
+
+            move(value)
+
+        });
+
+        document.getElementById('submit').addEventListener('click', () => {
+            let qs = Array.from(document.querySelectorAll('test-q:not(.no-q)'));
+            console.log(qs.map(el => {
+                return {
+                    q: el.querySelector('h1').textContent,
+                    a: el.value
+                }
+            }))
+            qs.map(el => {
+                return {
+                    q: el.querySelector('h1').textContent,
+                    a: el.value
+                }
+            }).forEach(item => {
+                if (!item.a) {
+                    return;
+                }
+                const tr = document.createElement('tr');
+                const td1 = document.createElement('td');
+                td2 = td1.cloneNode();
+
+                td1.textContent = item.q;
+                td2.textContent = item.a;
+
+                tr.appendChild(td1);
+                tr.appendChild(td2);
+                resBody.appendChild(tr);
+            });
+
+            testQs.moveTo(6);
+
+        });
+
+
+        function move(value) {
+            let to = 0;
+            switch (testQs.currentIndex) {
+                case 0:
+                    to = value === 'Option A' ? 1 : 2;
+                    break;
+                case 1:
+                    to = value === 'Option 1' ? 5 : 3;
+                    break;
+                case 2:
+                    to = value === 'Option X' ? 5 : 4;
+                    break;
+                case 3:
+                    to = 5;
+                    break;
+                case 4:
+                    to = 5;
+            }
+            testQs.moveTo(to);
+        }
+    </script>
+</body>
+
+</html>
